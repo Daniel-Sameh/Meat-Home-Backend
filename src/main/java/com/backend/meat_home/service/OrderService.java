@@ -70,10 +70,8 @@ public class OrderService {
     Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new RuntimeException("Order not found"));
 
-    // set status in order table
     order.setStatus("CONFIRMED");
 
-    // كمان نحفظ في جدول order_status history
     OrderStatus statusRecord = new OrderStatus();
     statusRecord.setOrder(order);
     statusRecord.setStatus("CONFIRMED");
@@ -83,5 +81,17 @@ public class OrderService {
 
     return orderRepository.save(order);
     }
-   
+
+    // Track Order
+    public String trackOrder(Long orderId, Long customerId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!order.getCustomerId().equals(customerId)) {
+            throw new RuntimeException("You are not allowed to view this order");
+        }
+
+        return order.getStatus();
+    }
+
 }

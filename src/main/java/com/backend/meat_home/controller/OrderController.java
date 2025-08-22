@@ -31,5 +31,13 @@ public class OrderController {
     public Order confirmOrder(@PathVariable Long orderId) {
         return orderService.confirmOrder(orderId);
     }
+
+    // Track Order
+    @GetMapping("/track/{orderId}")
+    public String trackOrder(@PathVariable Long orderId,
+                            @RequestParam Long customerId) {
+        return orderService.trackOrder(orderId, customerId);
+    }
+
     
 }
