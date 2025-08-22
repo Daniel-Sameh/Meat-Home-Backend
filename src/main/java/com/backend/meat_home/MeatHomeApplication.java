@@ -11,10 +11,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MeatHomeApplication {
 
 	static {
-		Dotenv.configure()
+		Dotenv dotenv = Dotenv.configure()
 				.ignoreIfMalformed()
 				.ignoreIfMissing()
 				.load();
+
+		System.setProperty("spring.datasource.url", dotenv.get("DB_URL"));
+		System.setProperty("spring.datasource.username", dotenv.get("DB_USERNAME"));
+		System.setProperty("spring.datasource.password", dotenv.get("DB_PASSWORD"));
 	}
 
 	public static void main(String[] args) {
