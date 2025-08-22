@@ -39,5 +39,11 @@ public class OrderController {
         return orderService.trackOrder(orderId, customerId);
     }
 
+    //Cancel Order
+    @PutMapping("/cancel/{orderId}")
+    public Order cancelOrder(@PathVariable Long orderId) {
+        return orderService.cancelOrder(orderId);
+    }
+
     
 }

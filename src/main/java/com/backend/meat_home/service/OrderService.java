@@ -19,7 +19,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final OrderStatusRepository orderStatusRepository;
 
-    // Place Order
+    // Place Order(Customer)
     public Order placeOrder(Long customerId, OrderRequestDTO orderRequestDTO) {
         Order order = new Order();
         order.setCustomerId(customerId);
@@ -60,12 +60,12 @@ public class OrderService {
         return savedOrder;
     }
 
-    // View pending Orders
+    // View pending Orders(Call Center)
     public List<Order> getUpcomingOrders() {
         return orderRepository.findByStatus("PENDING");
     }
 
-    // Confirm Orders
+    // Confirm Orders(Call Center)
     public Order confirmOrder(Long orderId) {
     Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -82,7 +82,7 @@ public class OrderService {
     return orderRepository.save(order);
     }
 
-    // Track Order
+    // Track Order(Customer)
     public String trackOrder(Long orderId, Long customerId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -94,4 +94,20 @@ public class OrderService {
         return order.getStatus();
     }
 
+    // Cancel Order(Admin)
+    public Order cancelOrder(Long orderId) {
+    Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new RuntimeException("Order not found"));
+
+    order.setStatus("CANCELLED");
+    orderRepository.save(order);
+
+    OrderStatus history = new OrderStatus();
+    history.setOrder(order);
+    history.setStatus("CANCELLED");
+    history.setTime(LocalDateTime.now());
+    orderStatusRepository.save(history);
+
+    return order;
+    }
 }
