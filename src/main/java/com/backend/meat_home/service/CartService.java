@@ -10,7 +10,6 @@ import com.backend.meat_home.repository.CartRepository;
 import com.backend.meat_home.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
