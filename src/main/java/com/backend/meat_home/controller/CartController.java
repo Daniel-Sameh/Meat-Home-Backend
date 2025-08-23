@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -36,7 +37,7 @@ public class CartController {
     @PutMapping("/update/{cartItemId}")
     public ResponseEntity<?> updateCartItem(@PathVariable Long cartItemId, @RequestBody CartItemRequest cartItemRequest) {
         try {
-            CartItem cartItem = cartService.updateCartItemQuantity(cartItemId, cartItemRequest.getQuantity());
+            Optional<CartItem> cartItem = cartService.updateCartItemQuantity(cartItemId, cartItemRequest.getQuantity());
             return ResponseEntity.ok(cartItem);
         } catch (Exception e) {
             if (e.getMessage().contains("not found")) {

@@ -38,6 +38,7 @@ public class CartService {
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
                     newCart.setCustomerId(user);
+                    cartRepository.save(newCart);
                     return newCart;
                 });
 
@@ -60,7 +61,7 @@ public class CartService {
         return cart;
     }
 
-    public CartItem updateCartItemQuantity(Long itemId, float quantity){
+    public Optional<CartItem> updateCartItemQuantity(Long itemId, float quantity){
         //Getting the cart item by the item id
         CartItem cartItem = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Cart item not found with id: " + itemId));
@@ -68,13 +69,13 @@ public class CartService {
         if (quantity<=0){
             //If the quantity is less than or equal to zero, delete the cart item
             cartItemRepository.deleteById(itemId);
-            return null; // Return null to indicate that the item was deleted
+            return Optional.empty(); // Return null to indicate that the item was deleted
         }
 
         //Updating the quantity of the cart item
         cartItem.setQuantity(quantity);
         cartItemRepository.save(cartItem);
-        return cartItem;
+        return Optional.of(cartItem);
     }
 
     public List<CartItem> viewCart(Long customerId) {
