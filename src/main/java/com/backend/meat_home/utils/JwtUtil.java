@@ -4,10 +4,10 @@ import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
@@ -25,7 +25,7 @@ public class JwtUtil {
         this.SECRET_KEY = dotenv.get("JWT_SECRET");
     }
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -34,7 +34,7 @@ public class JwtUtil {
         claims.put("role", role);
 
         Instant now = Instant.now();
-        Instant expiry = now.plusSeconds(36000);
+        Instant expiry = now.plusSeconds(3600);
 
         return Jwts.builder()
                 .setClaims(claims)
