@@ -43,7 +43,8 @@ public class User {
     public enum Role {
         ADMIN,
         CALL_CENTER_AGENT,
-        CUSTOMER
+        CUSTOMER,
+        DRIVER
     }
 
     public enum Status {
