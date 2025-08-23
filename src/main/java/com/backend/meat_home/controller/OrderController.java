@@ -16,8 +16,8 @@ public class OrderController {
 
     // Places order
     @PostMapping("/place")
-    public Order placeOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
-        Long customerId = 1L;
+    public Order placeOrder(@RequestBody OrderRequestDTO orderRequestDTO,
+                            @RequestParam Long customerId) {
         return orderService.placeOrder(customerId, orderRequestDTO);
     }
     // View Orders
