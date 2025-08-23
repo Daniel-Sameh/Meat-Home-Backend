@@ -12,16 +12,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/api/cart")
 @AllArgsConstructor
 public class CartController {
+    private static final Logger logger = LoggerFactory.getLogger(CartController.class);
     @Autowired
     private final CartService cartService;
 
     @PostMapping("/add-item")
     public ResponseEntity<?> addItemToCart(@RequestBody CartItemRequest cartItemRequest) {
-        System.out.println("Adding item to cart: " + cartItemRequest);
+        logger.info("Adding item to cart: {}", cartItemRequest);
         try{
             Cart cart = cartService.addItem(cartItemRequest);
             return ResponseEntity.ok(cart);
