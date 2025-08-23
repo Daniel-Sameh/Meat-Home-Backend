@@ -10,13 +10,6 @@ import io.github.cdimascio.dotenv.Dotenv;
 @SpringBootApplication
 public class MeatHomeApplication {
 
-	static {
-		Dotenv.configure()
-				.ignoreIfMalformed()
-				.ignoreIfMissing()
-				.load();
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(MeatHomeApplication.class, args);
 	}
