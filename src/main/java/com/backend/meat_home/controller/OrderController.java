@@ -20,6 +20,7 @@ public class OrderController {
                             @RequestParam Long customerId) {
         return orderService.placeOrder(customerId, orderRequestDTO);
     }
+
     // View Orders
     @GetMapping("/pending")
     public List<Order> getUpcomingOrders() {
@@ -45,5 +46,4 @@ public class OrderController {
         return orderService.cancelOrder(orderId);
     }
 
-    
 }
