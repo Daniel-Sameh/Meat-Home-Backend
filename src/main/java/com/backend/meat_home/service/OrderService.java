@@ -82,8 +82,7 @@ public class OrderService {
 
     // Track Order
     public String trackOrder(Long orderId, Long customerId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " not found"));
 
         if (!order.getCustomerId().equals(customerId)) {
             throw new RuntimeException("You are not allowed to view this order");
