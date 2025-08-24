@@ -25,6 +25,7 @@ public class OrderService {
         order.setCustomerId(customerId);
         order.setAddress(orderRequestDTO.getAddress());
         order.setCreatedAt(LocalDateTime.now());
+
         order.setStatus("PENDING");
 
         List<OrderItem> orderItems = new ArrayList<>();
@@ -67,21 +68,22 @@ public class OrderService {
 
     // Confirm Orders
     public Order confirmOrder(Long orderId) {
-    Order order = orderRepository.findById(orderId)
+      Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new RuntimeException("Order not found"));
 
-    // set status in order table
-    order.setStatus("CONFIRMED");
+      // set status in order table
+      order.setStatus("CONFIRMED");
 
-    // كمان نحفظ في جدول order_status history
-    OrderStatus statusRecord = new OrderStatus();
-    statusRecord.setOrder(order);
-    statusRecord.setStatus("CONFIRMED");
-    statusRecord.setTime(LocalDateTime.now());
+      // كمان نحفظ في جدول order_status history
+      OrderStatus statusRecord = new OrderStatus();
+      statusRecord.setOrder(order);
+      statusRecord.setStatus("CONFIRMED");
+      statusRecord.setTime(LocalDateTime.now());
 
-    orderStatusRepository.save(statusRecord);
+      orderStatusRepository.save(statusRecord);
 
-    return orderRepository.save(order);
+      return orderRepository.save(order);
     }
+
    
 }
