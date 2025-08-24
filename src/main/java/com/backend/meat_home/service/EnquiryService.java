@@ -46,13 +46,20 @@ public class EnquiryService {
         if (admin.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Only admin can view unread enquiries");
         }
-        List<Enquiry> unreadEnquiries = enquiryRepository.findByUnreadTrue();
-        for (Enquiry enquiry : unreadEnquiries) {
-            enquiry.setUnread(false);
-        }
-        enquiryRepository.saveAll(unreadEnquiries);
-        return unreadEnquiries;
+        return enquiryRepository.findByUnreadTrue();
     }
+
+    public Enquiry markEnquiryAsRead(Long enquiryId) {
+
+        Enquiry enquiry = enquiryRepository.findById(enquiryId)
+                .orElseThrow(() -> new RuntimeException("Enquiry not found"));
+
+        enquiry.setUnread(false);
+        return enquiryRepository.save(enquiry);
+    }
+
+
+
 
     public void hideEnquiries(Long adminId) {
         User admin = userRepository.findById(adminId)
