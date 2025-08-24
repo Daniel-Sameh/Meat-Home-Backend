@@ -1,5 +1,7 @@
 package com.backend.meat_home.controller;
 
+import com.backend.meat_home.dto.LoginRequest;
+import com.backend.meat_home.dto.LoginResponse;
 import com.backend.meat_home.dto.RegisterRequest;
 import com.backend.meat_home.dto.RegisterResponse;
 // ... existing code ...
@@ -26,6 +28,15 @@ public class AuthController {
                 .status(response.getStatusCode())
                 .body(response);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
+        LoginResponse response = authService.login(request);
+        return ResponseEntity
+                .status(response.getStatusCode())
+                .body(response);
+    }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
