@@ -1,13 +1,12 @@
 package com.backend.meat_home.controller;
 
-import com.backend.meat_home.dto.LoginRequest;
-import com.backend.meat_home.dto.LoginResponse;
-import com.backend.meat_home.dto.RegisterRequest;
-import com.backend.meat_home.dto.RegisterResponse;
+import com.backend.meat_home.dto.*;
 // ... existing code ...
 import com.backend.meat_home.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -36,6 +35,31 @@ public class AuthController {
                 .status(response.getStatusCode())
                 .body(response);
     }
+
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<PasswordResetResponse> resetPassword(@RequestBody @Valid PasswordResetRequest request) {
+        // Get the authenticated user's email from SecurityContext (set by JwtAuthenticationFilter)
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            PasswordResetResponse response = PasswordResetResponse.error("Authentication required",
+                    org.springframework.http.HttpStatus.UNAUTHORIZED);
+            return ResponseEntity
+                    .status(response.getStatusCode())
+                    .body(response);
+        }
+
+        // The principal contains the email (set in JwtAuthenticationFilter)
+        String userEmail = authentication.getName();
+
+        PasswordResetResponse response = authService.resetPassword(userEmail, request);
+        return ResponseEntity
+                .status(response.getStatusCode())
+                .body(response);
+    }
+
+
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

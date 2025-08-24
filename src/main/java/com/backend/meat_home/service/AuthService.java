@@ -1,9 +1,6 @@
 package com.backend.meat_home.service;
 
-import com.backend.meat_home.dto.LoginRequest;
-import com.backend.meat_home.dto.LoginResponse;
-import com.backend.meat_home.dto.RegisterRequest;
-import com.backend.meat_home.dto.RegisterResponse;
+import com.backend.meat_home.dto.*;
 import com.backend.meat_home.entity.User;
 import com.backend.meat_home.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +72,33 @@ public class AuthService {
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
         return LoginResponse.success(token, user.getRole().name(), user.getStatus().name());
+    }
+
+    public PasswordResetResponse resetPassword(String userEmail, PasswordResetRequest request) {
+        // Find user by email from JWT token
+        Optional<User> userOptional = userService.findByEmail(userEmail);
+
+        if (userOptional.isEmpty()) {
+            return PasswordResetResponse.error("User not found", HttpStatus.NOT_FOUND);
+        }
+
+        User user = userOptional.get();
+
+        // Verify old password
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            return PasswordResetResponse.error("Invalid old password", HttpStatus.BAD_REQUEST);
+        }
+
+        // Ensure new password is different from old password
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            return PasswordResetResponse.error("New password must be different from the current password", HttpStatus.BAD_REQUEST);
+        }
+
+        // Update password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userService.save(user);
+
+        return PasswordResetResponse.success("Password reset successfully");
     }
 
 
