@@ -30,13 +30,14 @@ public class EnquiryService {
         return enquiryRepository.save(enquiry);
     }
 
-    public List<Enquiry> getAllEnquiries(Long adminId) {
+    public Page<Enquiry> getAllEnquiries(Long adminId, int page, int size) {
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (admin.getRole() != User.Role.ADMIN) {
             throw new RuntimeException("Only admin can view all enquiries");
         }
-        return enquiryRepository.findAll();
+        Pageable pageable = PageRequest.of(page, size);
+        return enquiryRepository.findAll(pageable);
     }
 
     public List<Enquiry> getUnreadEnquiries(Long adminId) {
