@@ -66,8 +66,7 @@ public class OrderService {
 
     // Confirm Orders
     public Order confirmOrder(Long orderId) {
-    Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new RuntimeException("Order not found"));
+            .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " not found"));
 
     order.setStatus("CONFIRMED");
 
