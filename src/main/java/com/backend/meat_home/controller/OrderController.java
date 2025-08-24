@@ -16,8 +16,8 @@ public class OrderController {
 
     // Places order
     @PostMapping("/place")
-    public Order placeOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
-        Long customerId = 1L;
+    public Order placeOrder(@RequestBody OrderRequestDTO orderRequestDTO,
+                            @RequestParam Long customerId) {
         return orderService.placeOrder(customerId, orderRequestDTO);
     }
 
@@ -40,6 +40,10 @@ public class OrderController {
         return orderService.trackOrder(orderId, customerId);
     }
 
+    //Cancel Order
+    @PutMapping("/cancel/{orderId}")
+    public Order cancelOrder(@PathVariable Long orderId) {
+        return orderService.cancelOrder(orderId);
+    }
 
-    
 }

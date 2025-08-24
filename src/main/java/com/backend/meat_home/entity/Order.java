@@ -8,16 +8,16 @@ import java.util.List;
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-@Table(name = "orders") // علشان كلمة order محجوزة
+@Table(name = "orders") 
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    private Long customerId;  // هنجيبه من الـ Authentication
+    private Long customerId;  
 
-    private Long driverId; // ممكن يكون null لحد ما يتعين driver
+    private Long driverId; 
 
     private LocalDateTime createdAt;
 
