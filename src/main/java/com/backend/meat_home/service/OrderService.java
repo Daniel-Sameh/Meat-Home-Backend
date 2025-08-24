@@ -25,12 +25,15 @@ public class OrderService {
         order.setCustomerId(customerId);
         order.setAddress(orderRequestDTO.getAddress());
         order.setCreatedAt(LocalDateTime.now());
+
         order.setStatus("PENDING");
+
 
         List<OrderItem> orderItems = new ArrayList<>();
         double totalPrice = 0.0;
 
         for (OrderItemDTO itemDTO : orderRequestDTO.getItems()) {
+            Product product = productRepository.findById(itemDTO.getProductId())
                     .orElseThrow(() -> new NoSuchElementException("Product with ID " + itemDTO.getProductId() + " not found"));
 
             OrderItem item = new OrderItem();
@@ -59,6 +62,7 @@ public class OrderService {
         return savedOrder;
     }
 
+
     // View pending Orders
     public List<Order> getUpcomingOrders() {
         return orderRepository.findByStatus("PENDING");
@@ -66,23 +70,25 @@ public class OrderService {
 
     // Confirm Orders
     public Order confirmOrder(Long orderId) {
-            .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " not found"));
+      Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NoSuchElementException("Order with ID " + orderId + " not found"));
 
-    order.setStatus("CONFIRMED");
+      order.setStatus("CONFIRMED");
 
-    OrderStatus statusRecord = new OrderStatus();
-    statusRecord.setOrder(order);
-    statusRecord.setStatus("CONFIRMED");
-    statusRecord.setTime(LocalDateTime.now());
+      OrderStatus statusRecord = new OrderStatus();
+      statusRecord.setOrder(order);
+      statusRecord.setStatus("CONFIRMED");
+      statusRecord.setTime(LocalDateTime.now());
 
-    orderStatusRepository.save(statusRecord);
+      orderStatusRepository.save(statusRecord);
 
-    return orderRepository.save(order);
+      return orderRepository.save(order);
     }
 
     // Track Order
     public String trackOrder(Long orderId, Long customerId) {
-                .orElseThrow(() -> new RuntimeException("Order with ID " + orderId + " not found"));
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NoSuchElementException("Order with ID " + orderId + " not found"));
 
         if (!order.getCustomerId().equals(customerId)) {
             throw new RuntimeException("You are not allowed to view this order");
