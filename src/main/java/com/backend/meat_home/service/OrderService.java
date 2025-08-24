@@ -28,7 +28,6 @@ public class OrderService {
 
         order.setStatus("PENDING");
 
-
         List<OrderItem> orderItems = new ArrayList<>();
         double totalPrice = 0.0;
 
@@ -62,10 +61,12 @@ public class OrderService {
         return savedOrder;
     }
 
+
     // View pending Orders(Call Center)
     public List<Order> getUpcomingOrders() {
         return orderRepository.findByStatus("PENDING");
     }
+
 
     // Confirm Orders(Call Center)
     public Order confirmOrder(Long orderId) {
