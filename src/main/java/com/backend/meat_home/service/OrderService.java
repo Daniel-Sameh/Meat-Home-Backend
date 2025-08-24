@@ -31,8 +31,7 @@ public class OrderService {
         double totalPrice = 0.0;
 
         for (OrderItemDTO itemDTO : orderRequestDTO.getItems()) {
-            Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+                    .orElseThrow(() -> new NoSuchElementException("Product with ID " + itemDTO.getProductId() + " not found"));
 
             OrderItem item = new OrderItem();
             item.setOrder(order);
