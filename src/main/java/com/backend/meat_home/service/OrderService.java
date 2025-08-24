@@ -26,12 +26,15 @@ public class OrderService {
         order.setAddress(orderRequestDTO.getAddress());
         order.setCreatedAt(LocalDateTime.now());
 
+        order.setStatus("PENDING");
+
+
         List<OrderItem> orderItems = new ArrayList<>();
         double totalPrice = 0.0;
 
         for (OrderItemDTO itemDTO : orderRequestDTO.getItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+                    .orElseThrow(() -> new NoSuchElementException("Product with ID " + itemDTO.getProductId() + " not found"));
 
             OrderItem item = new OrderItem();
             item.setOrder(order);
@@ -59,5 +62,39 @@ public class OrderService {
         return savedOrder;
     }
 
-   
+
+    // View pending Orders
+    public List<Order> getUpcomingOrders() {
+        return orderRepository.findByStatus("PENDING");
+    }
+
+    // Confirm Orders
+    public Order confirmOrder(Long orderId) {
+      Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NoSuchElementException("Order with ID " + orderId + " not found"));
+
+      order.setStatus("CONFIRMED");
+
+      OrderStatus statusRecord = new OrderStatus();
+      statusRecord.setOrder(order);
+      statusRecord.setStatus("CONFIRMED");
+      statusRecord.setTime(LocalDateTime.now());
+
+      orderStatusRepository.save(statusRecord);
+
+      return orderRepository.save(order);
+    }
+
+    // Track Order
+    public String trackOrder(Long orderId, Long customerId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NoSuchElementException("Order with ID " + orderId + " not found"));
+
+        if (!order.getCustomerId().equals(customerId)) {
+            throw new RuntimeException("You are not allowed to view this order");
+        }
+
+        return order.getStatus();
+    }
+
 }

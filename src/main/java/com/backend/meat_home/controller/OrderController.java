@@ -21,5 +21,25 @@ public class OrderController {
         return orderService.placeOrder(customerId, orderRequestDTO);
     }
 
+    // View Orders
+    @GetMapping("/pending")
+    public List<Order> getUpcomingOrders() {
+        return orderService.getUpcomingOrders();
+    }
+
+    // Confirm Orders
+    @PutMapping("/confirm/{orderId}")
+    public Order confirmOrder(@PathVariable Long orderId) {
+        return orderService.confirmOrder(orderId);
+    }
+
+    // Track Order
+    @GetMapping("/track/{orderId}")
+    public String trackOrder(@PathVariable Long orderId,
+                            @RequestParam Long customerId) {
+        return orderService.trackOrder(orderId, customerId);
+    }
+
+
     
 }
