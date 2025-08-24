@@ -26,23 +26,23 @@ public class SettingsService {
     }
 
     public Settings getPlatformSettings() {
-        return settingsRepository.findById(1L)
+        return settingsRepository.findById(SETTINGS_RECORD_ID)
                 .orElseThrow(() -> new RuntimeException("Settings not found"));
     }
 
     public Settings getAboutSection() {
-        return settingsRepository.findById(1L)
+        return settingsRepository.findById(SETTINGS_RECORD_ID)
                 .orElseThrow(() -> new RuntimeException("Settings not found"));
     }
 
     public Settings getTermsAndConditions() {
-        return settingsRepository.findById(1L)
+        return settingsRepository.findById(SETTINGS_RECORD_ID)
                 .orElseThrow(() -> new RuntimeException("Settings not found"));
     }
 
     public Settings updateSettings(Long userId, Settings newSettings) {
         validateAdmin(userId);
-        Settings settings = settingsRepository.findById(1L).orElse(new Settings());
+        Settings settings = settingsRepository.findById(SETTINGS_RECORD_ID).orElse(new Settings());
         settings.setPlatformName(newSettings.getPlatformName());
         settings.setLogoUrl(newSettings.getLogoUrl());
         settings.setFacebookUrl(newSettings.getFacebookUrl());
