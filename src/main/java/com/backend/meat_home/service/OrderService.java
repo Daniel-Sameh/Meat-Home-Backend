@@ -7,9 +7,11 @@ import com.backend.meat_home.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +31,7 @@ public class OrderService {
         order.setStatus("PENDING");
 
         List<OrderItem> orderItems = new ArrayList<>();
-        double totalPrice = 0.0;
+        BigDecimal totalPrice = BigDecimal.ZERO;
 
         for (OrderItemDTO itemDTO : orderRequestDTO.getItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
@@ -40,14 +42,14 @@ public class OrderService {
             item.setProductId(product.getId());
             item.setPrice(product.getPrice());
             item.setQuantity(itemDTO.getQuantity());
-            item.setTotalPrice(product.getPrice() * itemDTO.getQuantity());
+            item.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(itemDTO.getQuantity())));
 
-            totalPrice += item.getTotalPrice();
+            totalPrice = item.getTotalPrice().add(item.getTotalPrice());
             orderItems.add(item);
         }
 
         order.setOrderItems(orderItems);
-        order.setTotalPrice(totalPrice);
+        order.setTotalPrice(totalPrice.doubleValue());
 
         Order savedOrder = orderRepository.save(order);
 

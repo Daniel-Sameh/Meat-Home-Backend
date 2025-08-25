@@ -27,8 +27,6 @@ public class Order {
   
     private String status;
 
-    private String status;
-
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 }

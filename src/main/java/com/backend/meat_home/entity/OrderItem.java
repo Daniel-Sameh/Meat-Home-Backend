@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
@@ -22,11 +24,11 @@ public class OrderItem {
 
     private Long productId;
 
-    private Double price;
+    private BigDecimal price;
 
     private Integer quantity;
 
-    private Double totalPrice;
+    private BigDecimal totalPrice;
 
     public Long getOrderId() {
     return order != null ? order.getOrderId() : null;
