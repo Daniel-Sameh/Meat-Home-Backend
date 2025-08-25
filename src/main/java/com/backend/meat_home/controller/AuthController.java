@@ -39,19 +39,7 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<PasswordResetResponse> resetPassword(@RequestBody @Valid PasswordResetRequest request) {
-        // Get the authenticated user's email from SecurityContext (set by JwtAuthenticationFilter)
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            PasswordResetResponse response = PasswordResetResponse.error("Authentication required",
-                    org.springframework.http.HttpStatus.UNAUTHORIZED);
-            return ResponseEntity
-                    .status(response.getStatusCode())
-                    .body(response);
-        }
-
-        // The principal contains the email (set in JwtAuthenticationFilter)
-        String userEmail = authentication.getName();
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         PasswordResetResponse response = authService.resetPassword(userEmail, request);
         return ResponseEntity

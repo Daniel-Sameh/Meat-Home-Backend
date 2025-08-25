@@ -102,6 +102,7 @@ public class AuthService {
     }
 
 
+
     private User.Status initiateStatus(User.Role role) {
         return role == User.Role.CUSTOMER ? User.Status.ACTIVE : User.Status.INACTIVE;
     }
