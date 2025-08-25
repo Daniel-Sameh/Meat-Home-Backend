@@ -51,28 +51,4 @@ public class User {
         ACTIVE,
         INACTIVE
     }
-
-    // Temporary test main method
-    public static void main(String[] args) {
-        User testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .name("Test User")
-                .password("test_password")
-                .phoneNumber("0123456789")
-                .role(Role.ADMIN)
-                .status(Status.ACTIVE)
-                .username("test_user")
-                .build();
-
-        System.out.println("User created: " + testUser);
-        System.out.println("Role: " + testUser.getRole());
-        System.out.println("Status: " + testUser.getStatus());
-
-
-        assert testUser.getId() == 1L;
-        assert testUser.getRole() == Role.ADMIN;
-        assert testUser.getStatus() == Status.ACTIVE;
-
-    }
 }

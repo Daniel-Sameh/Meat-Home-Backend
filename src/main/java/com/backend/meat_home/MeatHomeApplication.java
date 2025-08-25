@@ -15,13 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @SpringBootApplication
 public class MeatHomeApplication {
 
-	static {
-		Dotenv.configure()
-				.ignoreIfMalformed()
-				.ignoreIfMissing()
-				.load();
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(MeatHomeApplication.class, args);
 	}
