@@ -2,11 +2,13 @@ package com.backend.meat_home.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 
 @Entity
 @Data
+@Getter
 @Table(name = "Product")
 public class Product {
     @Id

@@ -1,13 +1,9 @@
 package com.backend.meat_home.controller;
 
-import com.backend.meat_home.dto.OrderRequestDTO;
-import com.backend.meat_home.dto.OrderResponseDTO;
-import com.backend.meat_home.dto.RateRequestDTO;
-import com.backend.meat_home.entity.Order;
-import com.backend.meat_home.entity.OrderRate;
+import com.backend.meat_home.dto.*;
+import com.backend.meat_home.entity.*;
 import com.backend.meat_home.service.OrderService;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -22,9 +18,9 @@ public class OrderController {
     // Places order
     @PostMapping("/place")
     public Order placeOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
-        Long customerId = 1L;
-        return orderService.placeOrder(customerId, orderRequestDTO);
+        return orderService.placeOrder(orderRequestDTO);
     }
+
     // View Orders
     @GetMapping("/pending")
     public List<Order> getPendingOrders() {
@@ -39,9 +35,8 @@ public class OrderController {
 
     // Track Order
     @GetMapping("/track/{orderId}")
-    public String trackOrder(@PathVariable Long orderId,
-                            @RequestParam Long customerId) {
-        return orderService.trackOrder(orderId, customerId);
+    public String trackOrder(@PathVariable Long orderId) {
+        return orderService.trackOrder(orderId);
     }
 
     //Cancel Order
@@ -53,10 +48,8 @@ public class OrderController {
     // Rate Order
     @PostMapping("/rate/{orderId}")
     public ResponseEntity<?> rateOrder(@PathVariable Long orderId,
-                                       @RequestParam Long customerId,
                                        @RequestBody RateRequestDTO request) {
-
-        OrderRate saved = orderService.rateOrder(orderId, customerId, request);
+        OrderRate saved = orderService.rateOrder(orderId, request);
         return ResponseEntity.status(201).body(saved);
     }
 
@@ -70,8 +63,8 @@ public class OrderController {
 
     // Get Orders
     @GetMapping("/all-orders/{customerId}")
-    public ResponseEntity<List<OrderResponseDTO>> getCustomerOrders(@PathVariable Long customerId) {
-        return ResponseEntity.ok(orderService.getOrdersByCustomer(customerId));
+    public ResponseEntity<List<OrderResponseDTO>> getCustomerOrders() {
+        return ResponseEntity.ok(orderService.getOrdersByCustomer());
     }
 
     // View Orders
@@ -82,9 +75,8 @@ public class OrderController {
 
     // Accept Orders
     @PutMapping("/accept/{orderId}")
-    public ResponseEntity<String> acceptOrder(@PathVariable Long orderId,
-                                            @RequestParam Long driverId) {
-        orderService.acceptOrder(orderId, driverId);
+    public ResponseEntity<String> acceptOrder(@PathVariable Long orderId) {
+        orderService.acceptOrder(orderId);
         return ResponseEntity.ok("Order accepted successfully");
     }
 

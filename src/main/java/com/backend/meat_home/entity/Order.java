@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Getter @Setter
@@ -17,16 +17,23 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    private Long customerId;  
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User customer;
 
-    private Long driverId; 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_id", referencedColumnName = "id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User driver;
+
 
     private LocalDateTime createdAt;
 
-    private BigDecimal totalPrice;
+    private Double totalPrice;
 
     private String address;
-
+  
     private String status;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)

@@ -1,19 +1,17 @@
 package com.backend.meat_home.service;
 
-import com.backend.meat_home.dto.OrderRequestDTO;
-import com.backend.meat_home.dto.OrderResponseDTO;
-import com.backend.meat_home.dto.OrderItemDTO;
-import com.backend.meat_home.dto.RateRequestDTO;
+import com.backend.meat_home.dto.*;
 import com.backend.meat_home.entity.*;
 import com.backend.meat_home.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -23,11 +21,17 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final OrderStatusRepository orderStatusRepository;
     private final OrderRateRepository orderRateRepository;
+    private final UserRepository userRepository;
+
 
     // Place Order(Customer)
-    public Order placeOrder(Long customerId, OrderRequestDTO orderRequestDTO) {
+    public Order placeOrder(OrderRequestDTO orderRequestDTO) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+
         Order order = new Order();
-        order.setCustomerId(customerId);
+        order.setCustomer(user);
         order.setAddress(orderRequestDTO.getAddress());
         order.setCreatedAt(LocalDateTime.now());
         order.setStatus("PENDING");
@@ -37,7 +41,7 @@ public class OrderService {
 
         for (OrderItemDTO itemDTO : orderRequestDTO.getItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+                    .orElseThrow(() -> new NoSuchElementException("Product with ID " + itemDTO.getProductId() + " not found"));
 
             OrderItem item = new OrderItem();
             item.setOrder(order);
@@ -46,16 +50,15 @@ public class OrderService {
             item.setQuantity(itemDTO.getQuantity());
             item.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(itemDTO.getQuantity())));
 
-            totalPrice.add(item.getTotalPrice());
+            totalPrice = totalPrice.add(item.getTotalPrice());
             orderItems.add(item);
         }
 
         order.setOrderItems(orderItems);
-        order.setTotalPrice(totalPrice);
+        order.setTotalPrice(totalPrice.doubleValue());
 
         Order savedOrder = orderRepository.save(order);
 
-        // Add status: PLACED
         OrderStatus orderStatus = new OrderStatus();
         orderStatus.setOrder(savedOrder);
         orderStatus.setStatus("PLACED");
@@ -72,62 +75,65 @@ public class OrderService {
 
     // Confirm Orders(Call Center)
     public Order confirmOrder(Long orderId) {
-    Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new RuntimeException("Order not found"));
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NoSuchElementException("Order not found"));
 
-    order.setStatus("CONFIRMED");
+        order.setStatus("CONFIRMED");
 
-    OrderStatus statusRecord = new OrderStatus();
-    statusRecord.setOrder(order);
-    statusRecord.setStatus("CONFIRMED");
-    statusRecord.setTime(LocalDateTime.now());
+        OrderStatus statusRecord = new OrderStatus();
+        statusRecord.setOrder(order);
+        statusRecord.setStatus("CONFIRMED");
+        statusRecord.setTime(LocalDateTime.now());
 
-    orderStatusRepository.save(statusRecord);
+        orderStatusRepository.save(statusRecord);
 
-    return orderRepository.save(order);
+        return orderRepository.save(order);
     }
 
     // Track Order(Customer)
-    public String trackOrder(Long orderId, Long customerId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+    public String trackOrder(Long orderId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        if (!order.getCustomerId().equals(customerId)) {
-            throw new RuntimeException("You are not allowed to view this order");
-        }
+        Long customerId = user.getId();
+
+        Order order = orderRepository.findByOrderIdAndCustomerId(orderId, customerId)
+            .orElseThrow(() -> new RuntimeException("Order not found"));
 
         return order.getStatus();
     }
 
     // Cancel Order(Admin)
     public Order cancelOrder(Long orderId) {
-    Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new RuntimeException("Order not found"));
-
-    order.setStatus("CANCELLED");
-    orderRepository.save(order);
-
-    OrderStatus history = new OrderStatus();
-    history.setOrder(order);
-    history.setStatus("CANCELLED");
-    history.setTime(LocalDateTime.now());
-    orderStatusRepository.save(history);
-
-    return order;
-    }
-
-    // Rate Order(Customer)
-    public OrderRate rateOrder(Long orderId, Long customerId, RateRequestDTO request) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        if (order.getCustomerId() == null || !order.getCustomerId().equals(customerId)) {
-            throw new RuntimeException("You are not allowed to rate this order");
-        }
+        order.setStatus("CANCELLED");
+        orderRepository.save(order);
 
-        if ("CANCELLED".equalsIgnoreCase(order.getStatus())) {
-            throw new RuntimeException("Cannot rate a cancelled order");
-        }
+        OrderStatus history = new OrderStatus();
+        history.setOrder(order);
+        history.setStatus("CANCELLED");
+        history.setTime(LocalDateTime.now());
+        orderStatusRepository.save(history);
+
+        return order;
+    }
+
+    // Rate Order(Customer)
+    public OrderRate rateOrder(Long orderId, RateRequestDTO request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+        Long customerId = user.getId();
+
+        Order order = orderRepository.findByOrderIdAndCustomerId(orderId, customerId)
+            .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!"DELIVERED".equalsIgnoreCase(order.getStatus())) {
+        throw new RuntimeException("You can only rate an order after it is delivered");
+    }
 
         if (orderRateRepository.findByOrderOrderId(orderId).isPresent()) {
             throw new RuntimeException("This order has already been rated");
@@ -158,14 +164,19 @@ public class OrderService {
     }
 
     // Get all Orders of CustomerId(Customer)
-    public List<OrderResponseDTO> getOrdersByCustomer(Long customerId) {
+    public List<OrderResponseDTO> getOrdersByCustomer() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+        Long customerId = user.getId();
+
         List<Order> orders = orderRepository.findByCustomerId(customerId);
 
         return orders.stream().map(order -> new OrderResponseDTO(
                 order.getOrderId(),
                 order.getCreatedAt(),
                 order.getTotalPrice(),
-                order.getOrderItems()   
+                order.getOrderItems()
         )).collect(Collectors.toList());
     }
 
@@ -175,23 +186,25 @@ public class OrderService {
     }
 
     // Accept Order(Driver)
-    public Order acceptOrder(Long orderId, Long driverId) {
-    Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new RuntimeException("Order not found"));
+    public Order acceptOrder(Long orderId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User driver = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Driver not found"));
 
-    order.setStatus("ON WAY");   
-    order.setDriverId(driverId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
 
-    OrderStatus statusRecord = new OrderStatus();
-    statusRecord.setOrder(order);
-    statusRecord.setStatus("ON WAY");
-    statusRecord.setTime(LocalDateTime.now());
+        order.setStatus("ON WAY");
+        order.setDriver(driver);
 
-    orderStatusRepository.save(statusRecord);
+        OrderStatus statusRecord = new OrderStatus();
+        statusRecord.setOrder(order);
+        statusRecord.setStatus("ON WAY");
+        statusRecord.setTime(LocalDateTime.now());
+        orderStatusRepository.save(statusRecord);
 
-    return orderRepository.save(order);
-}
-
+        return orderRepository.save(order);
+    }
 
 }
 
