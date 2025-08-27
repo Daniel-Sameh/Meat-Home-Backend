@@ -32,7 +32,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/categories/{id}").permitAll()
                         .requestMatchers("/api/orders/place").hasRole("CUSTOMER")
                         .requestMatchers("/api/orders/pending").hasAnyRole("CALL_CENTER_AGENT", "ADMIN")
-                        .requestMatchers("/api/orders/confirm/{orderId}").hasRole("CALL_CENTTER_AGENT")
+                        .requestMatchers("/api/orders/confirm/{orderId}").hasRole("CALL_CENTER_AGENT")
                         .requestMatchers("/api/orders/pending").hasAnyRole("CALL_CENTER_AGENT", "ADMIN")
                         .requestMatchers("/api/orders/cancel/{orderId}").hasRole("ADMIN")
                         .requestMatchers("/api/orders/rate/{orderId}").hasRole("CUSTOMER")
@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/orders/all-orders/{customerId}").hasAnyRole("ADMIN", "CUSTOMER")
                         .requestMatchers("/api/orders/ready").hasAnyRole("CALL_CENTER_AGENT", "ADMIN", "DRIVER")
                         .requestMatchers("/api/orders/accept/{orderId}").hasRole("DRIVER")
+                        .requestMatchers("/api/orders/status/{orderId}").hasAnyRole("CALL_CENTER_AGENT", "ADMIN", "DRIVER")
 
 
                         /**

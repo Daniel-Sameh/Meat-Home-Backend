@@ -155,12 +155,12 @@ public class OrderService {
     }
 
     // View & Hide Review(Admin)
-    public OrderRate toggleVisibility(Long id, boolean visible) {
+    public void toggleVisibility(Long id, boolean visible) {
         OrderRate orderRate = orderRateRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
 
         orderRate.setVisible(visible);
-        return orderRateRepository.save(orderRate);
+        orderRateRepository.save(orderRate);
     }
 
     // Get all Orders of CustomerId(Customer)
@@ -186,7 +186,7 @@ public class OrderService {
     }
 
     // Accept Order(Driver)
-    public Order acceptOrder(Long orderId) {
+    public void acceptOrder(Long orderId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User driver = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
@@ -194,16 +194,62 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        order.setStatus("ON WAY");
+        order.setStatus("ON_WAY");
         order.setDriver(driver);
 
         OrderStatus statusRecord = new OrderStatus();
         statusRecord.setOrder(order);
-        statusRecord.setStatus("ON WAY");
+        statusRecord.setStatus("ON_WAY");
         statusRecord.setTime(LocalDateTime.now());
         orderStatusRepository.save(statusRecord);
 
-        return orderRepository.save(order);
+        orderRepository.save(order);
+    }
+
+    // Change Order Status(Admin & Call Center & Driver)
+    public Order changeOrderStatus(Long orderId, String newStatus, String role) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NoSuchElementException("Order not found"));
+
+        String currentStatus = order.getStatus();
+
+        switch (role) {
+            case "CALL_CENTER_AGENT" -> {
+                if (currentStatus.equals("CONFIRMED") && newStatus.equals("IN_PREPARATION")) {
+                    order.setStatus("IN_PREPARATION");
+                } else if (currentStatus.equals("IN_PREPARATION") && newStatus.equals("READY")) {
+                    order.setStatus("READY");
+                } else {
+                    throw new IllegalStateException("Call Center cannot change status from " + currentStatus + " to " + newStatus);
+                }
+            }
+            case "DRIVER" -> {
+                String email = SecurityContextHolder.getContext().getAuthentication().getName();
+                User driver = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new NoSuchElementException("Driver not found"));
+
+                if (order.getDriver() == null || !order.getDriver().getId().equals(driver.getId())) {
+                    throw new SecurityException("This driver is not assigned to this order");
+                }
+                if (currentStatus.equals("ON_WAY") && newStatus.equals("DELIVERED")) {
+                    order.setStatus("DELIVERED");
+                } else {
+                    throw new IllegalStateException("Driver cannot change status from " + currentStatus + " to " + newStatus);
+                }
+            }
+            case "ADMIN" -> order.setStatus(newStatus);
+            default -> throw new SecurityException("Role " + role + " is not allowed to change order status");
+        }
+
+        Order savedOrder = orderRepository.save(order);
+
+        OrderStatus orderStatus = new OrderStatus();
+        orderStatus.setOrder(savedOrder);
+        orderStatus.setStatus(newStatus);
+        orderStatus.setTime(LocalDateTime.now());
+        orderStatusRepository.save(orderStatus);
+
+        return savedOrder;
     }
 
 }

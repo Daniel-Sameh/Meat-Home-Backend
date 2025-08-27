@@ -3,6 +3,7 @@ package com.backend.meat_home.controller;
 import com.backend.meat_home.dto.*;
 import com.backend.meat_home.entity.*;
 import com.backend.meat_home.service.OrderService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -62,7 +63,7 @@ public class OrderController {
     }
 
     // Get Orders
-    @GetMapping("/all-orders/{customerId}")
+    @GetMapping("/all-orders")
     public ResponseEntity<List<OrderResponseDTO>> getCustomerOrders() {
         return ResponseEntity.ok(orderService.getOrdersByCustomer());
     }
@@ -79,5 +80,19 @@ public class OrderController {
         orderService.acceptOrder(orderId);
         return ResponseEntity.ok("Order accepted successfully");
     }
+
+    // Change Order Status
+    @PutMapping("/status/{orderId}")
+    public ResponseEntity<Order> changeStatus(
+            @PathVariable Long orderId,
+            @RequestParam String newStatus) {
+
+        String role = SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
+
+        Order updatedOrder = orderService.changeOrderStatus(orderId, newStatus, role);
+        return ResponseEntity.ok(updatedOrder);
+    }
+
 
 }
