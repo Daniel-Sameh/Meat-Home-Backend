@@ -1,6 +1,8 @@
 package com.backend.meat_home.service;
 
+
 import com.backend.meat_home.dto.*;
+
 import com.backend.meat_home.entity.*;
 import com.backend.meat_home.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -250,6 +252,58 @@ public class OrderService {
         orderStatusRepository.save(orderStatus);
 
         return savedOrder;
+
+    // Rate Order(Customer)
+    public OrderRate rateOrder(Long orderId, Long customerId, RateRequestDTO request) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getCustomerId() == null || !order.getCustomerId().equals(customerId)) {
+            throw new RuntimeException("You are not allowed to rate this order");
+        }
+
+        if ("CANCELLED".equalsIgnoreCase(order.getStatus())) {
+            throw new RuntimeException("Cannot rate a cancelled order");
+        }
+
+        if (orderRateRepository.findByOrderOrderId(orderId).isPresent()) {
+            throw new RuntimeException("This order has already been rated");
+        }
+
+        int rate = request.getRate();
+        if (rate < 1 || rate > 5) {
+            throw new RuntimeException("Rate must be between 1 and 5");
+        }
+
+        OrderRate orderRate = new OrderRate();
+        orderRate.setOrder(order);
+        orderRate.setRate(rate);
+        orderRate.setReview(request.getReview());
+        orderRate.setVisible(true);
+        orderRate.setCreatedAt(LocalDateTime.now());
+
+        return orderRateRepository.save(orderRate);
+    }
+
+    // View & Hide Review(Admin)
+    public OrderRate toggleVisibility(Long id, boolean visible) {
+        OrderRate orderRate = orderRateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        orderRate.setVisible(visible);
+        return orderRateRepository.save(orderRate);
+    }
+
+    // Get all Orders of CustomerId(Customer)
+    public List<OrderResponseDTO> getOrdersByCustomer(Long customerId) {
+        List<Order> orders = orderRepository.findByCustomerId(customerId);
+
+        return orders.stream().map(order -> new OrderResponseDTO(
+                order.getOrderId(),
+                order.getCreatedAt(),
+                order.getTotalPrice(),
+                order.getOrderItems()   
+        )).collect(Collectors.toList());
     }
 
 }
