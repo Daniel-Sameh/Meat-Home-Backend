@@ -21,10 +21,11 @@ public class OrderController {
 
     // Places order
     @PostMapping("/place")
-    public Order placeOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
-        Long customerId = 1L;
+    public Order placeOrder(@RequestBody OrderRequestDTO orderRequestDTO,
+                            @RequestParam Long customerId) {
         return orderService.placeOrder(customerId, orderRequestDTO);
     }
+  
     // View Orders
     @GetMapping("/pending")
     public List<Order> getUpcomingOrders() {
@@ -73,5 +74,5 @@ public class OrderController {
     public ResponseEntity<List<OrderResponseDTO>> getCustomerOrders(@PathVariable Long customerId) {
         return ResponseEntity.ok(orderService.getOrdersByCustomer(customerId));
     }
-    
+
 }

@@ -8,10 +8,12 @@ import com.backend.meat_home.entity.*;
 import com.backend.meat_home.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -28,28 +30,29 @@ public class OrderService {
         order.setCustomerId(customerId);
         order.setAddress(orderRequestDTO.getAddress());
         order.setCreatedAt(LocalDateTime.now());
+
         order.setStatus("PENDING");
 
         List<OrderItem> orderItems = new ArrayList<>();
-        double totalPrice = 0.0;
+        BigDecimal totalPrice = BigDecimal.ZERO;
 
         for (OrderItemDTO itemDTO : orderRequestDTO.getItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+                    .orElseThrow(() -> new NoSuchElementException("Product with ID " + itemDTO.getProductId() + " not found"));
 
             OrderItem item = new OrderItem();
             item.setOrder(order);
             item.setProductId(product.getId());
             item.setPrice(product.getPrice());
             item.setQuantity(itemDTO.getQuantity());
-            item.setTotalPrice(product.getPrice() * itemDTO.getQuantity());
+            item.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(itemDTO.getQuantity())));
 
-            totalPrice += item.getTotalPrice();
+            totalPrice = item.getTotalPrice().add(item.getTotalPrice());
             orderItems.add(item);
         }
 
         order.setOrderItems(orderItems);
-        order.setTotalPrice(totalPrice);
+        order.setTotalPrice(totalPrice.doubleValue());
 
         Order savedOrder = orderRepository.save(order);
 
@@ -63,32 +66,34 @@ public class OrderService {
         return savedOrder;
     }
 
+
     // View pending Orders(Call Center)
     public List<Order> getUpcomingOrders() {
         return orderRepository.findByStatus("PENDING");
     }
 
+
     // Confirm Orders(Call Center)
     public Order confirmOrder(Long orderId) {
-    Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new RuntimeException("Order not found"));
+      Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new NoSuchElementException("Order with ID " + orderId + " not found"));
 
-    order.setStatus("CONFIRMED");
+      order.setStatus("CONFIRMED");
 
-    OrderStatus statusRecord = new OrderStatus();
-    statusRecord.setOrder(order);
-    statusRecord.setStatus("CONFIRMED");
-    statusRecord.setTime(LocalDateTime.now());
+      OrderStatus statusRecord = new OrderStatus();
+      statusRecord.setOrder(order);
+      statusRecord.setStatus("CONFIRMED");
+      statusRecord.setTime(LocalDateTime.now());
 
-    orderStatusRepository.save(statusRecord);
+      orderStatusRepository.save(statusRecord);
 
-    return orderRepository.save(order);
+      return orderRepository.save(order);
     }
 
     // Track Order(Customer)
     public String trackOrder(Long orderId, Long customerId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new NoSuchElementException("Order with ID " + orderId + " not found"));
 
         if (!order.getCustomerId().equals(customerId)) {
             throw new RuntimeException("You are not allowed to view this order");

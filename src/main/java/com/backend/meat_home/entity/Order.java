@@ -24,7 +24,7 @@ public class Order {
     private Double totalPrice;
 
     private String address;
-
+  
     private String status;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
