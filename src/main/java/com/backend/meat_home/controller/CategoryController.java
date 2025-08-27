@@ -19,13 +19,13 @@ public class CategoryController {
     }
 
     // Update
-    @PatchMapping("/{id}")
+    @PatchMapping("/update/{id}")
     public Category update(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         return categoryService.updateCategory(id, updates);
     }
 
     // Delete
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public void delete(@PathVariable Long id) {
         categoryService.deleteCategory(id);
     }

@@ -1,11 +1,9 @@
 package com.backend.meat_home.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import java.math.BigDecimal;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.math.BigDecimal;
 
 @Entity
 @Getter @Setter

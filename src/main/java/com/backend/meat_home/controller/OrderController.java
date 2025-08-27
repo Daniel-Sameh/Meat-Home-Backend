@@ -1,11 +1,11 @@
 package com.backend.meat_home.controller;
 
-import com.backend.meat_home.dto.OrderRequestDTO;
-import com.backend.meat_home.dto.OrderResponseDTO;
-import com.backend.meat_home.dto.RateRequestDTO;
-import com.backend.meat_home.entity.Order;
-import com.backend.meat_home.entity.OrderRate;
+
+import com.backend.meat_home.dto.*;
+import com.backend.meat_home.entity.*;
+
 import com.backend.meat_home.service.OrderService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -21,15 +21,14 @@ public class OrderController {
 
     // Places order
     @PostMapping("/place")
-    public Order placeOrder(@RequestBody OrderRequestDTO orderRequestDTO,
-                            @RequestParam Long customerId) {
-        return orderService.placeOrder(customerId, orderRequestDTO);
+    public Order placeOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
+        return orderService.placeOrder(orderRequestDTO);
     }
-  
+
     // View Orders
     @GetMapping("/pending")
-    public List<Order> getUpcomingOrders() {
-        return orderService.getUpcomingOrders();
+    public List<Order> getPendingOrders() {
+        return orderService.getPendingOrders();
     }
 
     // Confirm Orders
@@ -40,9 +39,8 @@ public class OrderController {
 
     // Track Order
     @GetMapping("/track/{orderId}")
-    public String trackOrder(@PathVariable Long orderId,
-                            @RequestParam Long customerId) {
-        return orderService.trackOrder(orderId, customerId);
+    public String trackOrder(@PathVariable Long orderId) {
+        return orderService.trackOrder(orderId);
     }
 
     //Cancel Order
@@ -54,10 +52,8 @@ public class OrderController {
     // Rate Order
     @PostMapping("/rate/{orderId}")
     public ResponseEntity<?> rateOrder(@PathVariable Long orderId,
-                                       @RequestParam Long customerId,
                                        @RequestBody RateRequestDTO request) {
-
-        OrderRate saved = orderService.rateOrder(orderId, customerId, request);
+        OrderRate saved = orderService.rateOrder(orderId, request);
         return ResponseEntity.status(201).body(saved);
     }
 
@@ -70,9 +66,35 @@ public class OrderController {
     }
 
     // Get Orders
-    @GetMapping("/all-orders/{customerId}")
-    public ResponseEntity<List<OrderResponseDTO>> getCustomerOrders(@PathVariable Long customerId) {
-        return ResponseEntity.ok(orderService.getOrdersByCustomer(customerId));
+    @GetMapping("/all-orders")
+    public ResponseEntity<List<OrderResponseDTO>> getCustomerOrders() {
+        return ResponseEntity.ok(orderService.getOrdersByCustomer());
+    }
+
+    // View Orders
+    @GetMapping("/ready")
+    public ResponseEntity<List<Order>> getReadyOrders() {
+        return ResponseEntity.ok(orderService.getReadyOrders());
+    }
+
+    // Accept Orders
+    @PutMapping("/accept/{orderId}")
+    public ResponseEntity<String> acceptOrder(@PathVariable Long orderId) {
+        orderService.acceptOrder(orderId);
+        return ResponseEntity.ok("Order accepted successfully");
+    }
+
+    // Change Order Status
+    @PutMapping("/status/{orderId}")
+    public ResponseEntity<Order> changeStatus(
+            @PathVariable Long orderId,
+            @RequestParam String newStatus) {
+
+        String role = SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
+
+        Order updatedOrder = orderService.changeOrderStatus(orderId, newStatus, role);
+        return ResponseEntity.ok(updatedOrder);
     }
 
 }

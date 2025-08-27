@@ -9,6 +9,6 @@ import java.util.List;
 public class OrderResponseDTO {
     private Long orderId;
     private LocalDateTime createdAt;
-    private Double totalPrice;
+    private double totalPrice;
     private List<OrderItem> items;
 }
