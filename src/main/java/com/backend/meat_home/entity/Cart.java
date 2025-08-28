@@ -2,7 +2,6 @@ package com.backend.meat_home.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.Date;
 
 @Entity

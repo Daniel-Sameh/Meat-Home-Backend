@@ -14,6 +14,7 @@ public class SettingsController {
         this.settingsService = settingsService;
     }
 
+    // Get Platform Settings
     @GetMapping("/platform")
     public Object getPlatformSettings() {
         Settings settings = settingsService.getPlatformSettings();
@@ -27,6 +28,7 @@ public class SettingsController {
         };
     }
 
+    // Get About
     @GetMapping("/about")
     public Object getAboutSection() {
         Settings settings = settingsService.getAboutSection();
@@ -36,6 +38,7 @@ public class SettingsController {
         };
     }
 
+    // Get Terms
     @GetMapping("/terms")
     public Object getTermsAndConditions() {
         Settings settings = settingsService.getTermsAndConditions();
@@ -44,13 +47,15 @@ public class SettingsController {
         };
     }
 
-    @PutMapping("/update/{userId}")
-    public Settings updateSettings(@PathVariable Long userId, @RequestBody Settings newSettings) {
-        return settingsService.updateSettings(userId, newSettings);
+    // Update
+    @PutMapping("/update")
+    public Settings updateSettings(@RequestBody Settings newSettings) {
+        return settingsService.updateSettings(newSettings);
     }
 
-    @PostMapping("/preview/{userId}")
-    public Settings previewSettings(@PathVariable Long userId, @RequestBody Settings newSettings) {
-        return settingsService.previewSettings(userId, newSettings);
+    // Preview
+    @PostMapping("/preview")
+    public Settings previewSettings(@RequestBody Settings newSettings) {
+        return settingsService.previewSettings(newSettings);
     }
 }

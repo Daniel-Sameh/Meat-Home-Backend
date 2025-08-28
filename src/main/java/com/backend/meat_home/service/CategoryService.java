@@ -8,6 +8,7 @@ import java.util.*;
 
 @Service
 public class CategoryService {
+
     @Autowired
     private CategoryRepository categoryRepository;
 
@@ -51,7 +52,6 @@ public class CategoryService {
             
     return new Category(category.getId(), category.getName());
     }
-
 }
 
 

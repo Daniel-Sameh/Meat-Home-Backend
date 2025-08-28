@@ -24,7 +24,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll() // public endpoints
+                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/reset-password").permitAll() // public endpoints
                         .requestMatchers("/api/categories/create").hasRole("ADMIN")//Change this to the suitable role and correct api
                         .requestMatchers("/api/categories/update").hasRole("ADMIN")
                         .requestMatchers("/api/categories/delete").hasRole("ADMIN")
@@ -41,13 +41,19 @@ public class SecurityConfig {
                         .requestMatchers("/api/orders/ready").hasAnyRole("CALL_CENTER_AGENT", "ADMIN", "DRIVER")
                         .requestMatchers("/api/orders/accept/{orderId}").hasRole("DRIVER")
                         .requestMatchers("/api/orders/status/{orderId}").hasAnyRole("CALL_CENTER_AGENT", "ADMIN", "DRIVER")
-
+                        .requestMatchers("/api/orders/track/{orderId}").hasAnyRole("CUSTOMER", "CALL_CENTER_AGENT", "ADMIN")
+                        .requestMatchers("/api/enquiries/submit").hasRole("CUSTOMER")
+                        .requestMatchers("/api/enquiries/all-enquiries").hasRole("ADMIN")
+                        .requestMatchers("/api/enquiries/unread").hasRole("ADMIN")
+                        .requestMatchers("/api/enquiries/read/{enquiryId}").hasRole("ADMIN")
+                        .requestMatchers("/api/enquiries/visibility/{enquiryId}").hasRole("ADMIN")
+                        .requestMatchers("/api/settings/platform", "/api/settings/terms", "/api/settings/about").permitAll()
+                        .requestMatchers("/api/settings/update", "/api/settings/preview").hasRole("ADMIN")
 
                         /**
                          * Simply add any endpoint you need to be protected along with the role
                          * .requestMatchers("/api/protected/**").hasRole("role")
                          * No extra checks needed inside your controller
-                         *
                          * Extract the user email from the token and use it to fetch the user from the database
                          *   String email = SecurityContextHolder.getContext().getAuthentication().getName();
                          *   see: Line 42 in {@link com.backend.meat_home.controller.AuthController}

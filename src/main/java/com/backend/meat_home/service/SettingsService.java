@@ -1,48 +1,42 @@
 package com.backend.meat_home.service;
 
 import com.backend.meat_home.entity.Settings;
-import com.backend.meat_home.entity.User;
 import com.backend.meat_home.repository.SettingsRepository;
-import com.backend.meat_home.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class SettingsService {
 
     private final SettingsRepository settingsRepository;
-    private final UserRepository userRepository;
+    @Value("${settings.record.id}")
+    private Long settingsRecordId;
 
-    public SettingsService(SettingsRepository settingsRepository, UserRepository userRepository) {
+    public SettingsService(SettingsRepository settingsRepository) {
         this.settingsRepository = settingsRepository;
-        this.userRepository = userRepository;
     }
 
-    private void validateAdmin(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (user.getRole() != User.Role.ADMIN) {
-            throw new RuntimeException("Access denied: only admins can perform this action");
-        }
-    }
-
+    // Get Platform Settings
     public Settings getPlatformSettings() {
-        return settingsRepository.findById(SETTINGS_RECORD_ID)
+        return settingsRepository.findById(settingsRecordId)
                 .orElseThrow(() -> new RuntimeException("Settings not found"));
     }
 
+    // Get About Section
     public Settings getAboutSection() {
-        return settingsRepository.findById(SETTINGS_RECORD_ID)
+        return settingsRepository.findById(settingsRecordId)
                 .orElseThrow(() -> new RuntimeException("Settings not found"));
     }
 
+    // Get Terms and Conditions
     public Settings getTermsAndConditions() {
-        return settingsRepository.findById(SETTINGS_RECORD_ID)
+        return settingsRepository.findById(settingsRecordId)
                 .orElseThrow(() -> new RuntimeException("Settings not found"));
     }
 
-    public Settings updateSettings(Long userId, Settings newSettings) {
-        validateAdmin(userId);
-        Settings settings = settingsRepository.findById(SETTINGS_RECORD_ID).orElse(new Settings());
+    // Update Settings
+    public Settings updateSettings(Settings newSettings) {
+        Settings settings = settingsRepository.findById(settingsRecordId).orElse(new Settings());
         settings.setPlatformName(newSettings.getPlatformName());
         settings.setLogoUrl(newSettings.getLogoUrl());
         settings.setFacebookUrl(newSettings.getFacebookUrl());
@@ -55,8 +49,8 @@ public class SettingsService {
         return settingsRepository.save(settings);
     }
 
-    public Settings previewSettings(Long userId, Settings newSettings) {
-        validateAdmin(userId);
+    // Preview Settings
+    public Settings previewSettings(Settings newSettings) {
         Settings current = settingsRepository.findById(1L).orElse(new Settings());
         Settings preview = new Settings();
         preview.setPlatformName(newSettings.getPlatformName() != null ? newSettings.getPlatformName() : current.getPlatformName());
