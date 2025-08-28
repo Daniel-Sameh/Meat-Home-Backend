@@ -8,10 +8,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +17,12 @@ import org.slf4j.LoggerFactory;
 @RequestMapping("/api/cart")
 @AllArgsConstructor
 public class CartController {
+
     private static final Logger logger = LoggerFactory.getLogger(CartController.class);
     @Autowired
     private final CartService cartService;
 
+    // Add Item
     @PostMapping("/add-item")
     public ResponseEntity<?> addItemToCart(@RequestBody CartItemRequest cartItemRequest) {
         logger.info("Adding item to cart: {}", cartItemRequest);
@@ -38,6 +38,7 @@ public class CartController {
         }
     }
 
+    // Update Cart
     @PutMapping("/update/{cartItemId}")
     public ResponseEntity<?> updateCartItem(@PathVariable Long cartItemId, @RequestBody CartItemRequest cartItemRequest) {
         try {
@@ -52,6 +53,7 @@ public class CartController {
         }
     }
 
+    // Get Cart
     @GetMapping("/view/{customerId}")
     public ResponseEntity<?> viewCart(@PathVariable Long customerId) {
         try {
@@ -65,5 +67,4 @@ public class CartController {
             }
         }
     }
-
 }

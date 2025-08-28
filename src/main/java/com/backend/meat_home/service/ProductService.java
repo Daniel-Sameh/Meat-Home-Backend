@@ -5,15 +5,16 @@ import com.backend.meat_home.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
 @Service
 @Transactional
 @AllArgsConstructor
 public class ProductService {
+
     private final ProductRepository productRepository;
 
+    // Get Product by ID
     Optional<Product> getProductById(Long id) {
         return productRepository.findById(id);
     }

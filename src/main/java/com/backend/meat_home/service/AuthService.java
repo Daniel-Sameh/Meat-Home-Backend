@@ -4,24 +4,21 @@ import com.backend.meat_home.dto.*;
 import com.backend.meat_home.entity.User;
 import com.backend.meat_home.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
-
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-
+    // Sign up
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
         // Validate duplicates
@@ -53,6 +50,7 @@ public class AuthService {
         );
     }
 
+    // Login
     public LoginResponse login(LoginRequest request) {
         // Find user by username
         Optional<User> userOptional = userService.findByUsername(request.getUsername());
@@ -74,6 +72,7 @@ public class AuthService {
         return LoginResponse.success(token, user.getRole().name(), user.getStatus().name());
     }
 
+    //Reset Password
     public PasswordResetResponse resetPassword(String userEmail, PasswordResetRequest request) {
         // Find user by email from JWT token
         Optional<User> userOptional = userService.findByEmail(userEmail);
@@ -101,18 +100,19 @@ public class AuthService {
         return PasswordResetResponse.success("Password reset successfully");
     }
 
-
-
+    // User Status
     private User.Status initiateStatus(User.Role role) {
         return role == User.Role.CUSTOMER ? User.Status.ACTIVE : User.Status.INACTIVE;
     }
 
+    // Create Message
     private String createMessage(User.Status status) {
         return status == User.Status.ACTIVE
                 ? "Registration successful. Your account is active."
                 : "Registration successful. Your account is inactive until approved by the admin.";
     }
 
+    // Build Response
     private RegisterResponse buildResponse(String message, String role, String status, HttpStatus statusCode) {
         return new RegisterResponse(message, role, status, statusCode);
     }

@@ -11,7 +11,6 @@ import com.backend.meat_home.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -19,12 +18,13 @@ import java.util.Optional;
 @Transactional
 @AllArgsConstructor
 public class CartService {
+
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
 
-
+    // Add Item to Cart
     public Cart addItem(CartItemRequest cartItemRequest) {
 
         //Getting user by customerId
@@ -60,6 +60,7 @@ public class CartService {
         return cart;
     }
 
+    // Update Quantity
     public Optional<CartItem> updateCartItemQuantity(Long itemId, float quantity){
         //Getting the cart item by the item id
         CartItem cartItem = cartItemRepository.findById(itemId)
@@ -77,6 +78,7 @@ public class CartService {
         return Optional.of(cartItem);
     }
 
+    // View Cart
     public List<CartItem> viewCart(Long customerId) {
         //Finding the cart by customerId
         Cart cart = cartRepository.findByCustomerId_Id(customerId)
@@ -86,6 +88,7 @@ public class CartService {
         return cartItemRepository.findAllByCartId(cart.getId());
     }
 
+    //Reset Cart
     public Boolean resetCart(Long customerId){
         //Finding the cart by customerId
         Cart cart = cartRepository.findByCustomerId_Id(customerId)
@@ -99,5 +102,4 @@ public class CartService {
 
         return true;
     }
-
 }

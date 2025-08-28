@@ -5,9 +5,14 @@ import com.backend.meat_home.entity.User;
 import com.backend.meat_home.repository.EnquiryRepository;
 import com.backend.meat_home.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -16,12 +21,12 @@ public class EnquiryService {
     private final EnquiryRepository enquiryRepository;
     private final UserRepository userRepository;
 
-    public Enquiry submitEnquiry(Long userId, String content) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (user.getRole() != User.Role.CUSTOMER) {
-            throw new RuntimeException("Only customers can submit enquiries");
-        }
+    // Submit Enquiry
+    public Enquiry submitEnquiry(String content) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+
         Enquiry enquiry = new Enquiry();
         enquiry.setContent(content);
         enquiry.setUserId(user.getId());
@@ -30,25 +35,25 @@ public class EnquiryService {
         return enquiryRepository.save(enquiry);
     }
 
-    public Page<Enquiry> getAllEnquiries(Long adminId, int page, int size) {
-        User admin = userRepository.findById(adminId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (admin.getRole() != User.Role.ADMIN) {
-            throw new RuntimeException("Only admin can view all enquiries");
-        }
+    // Get All Enquiries
+    public Page<Enquiry> getAllEnquiries(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return enquiryRepository.findAll(pageable);
     }
 
-    public List<Enquiry> getUnreadEnquiries(Long adminId) {
-        User admin = userRepository.findById(adminId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (admin.getRole() != User.Role.ADMIN) {
-            throw new RuntimeException("Only admin can view unread enquiries");
+    // Get Unread Enquiries
+    public List<Enquiry> getUnreadEnquiries() {
+        List<Enquiry> unreadEnquiries = enquiryRepository.findByUnreadTrue();
+
+        for (Enquiry enquiry : unreadEnquiries) {
+            enquiry.setUnread(false);
         }
-        return enquiryRepository.findByUnreadTrue();
+
+        enquiryRepository.saveAll(unreadEnquiries);
+        return unreadEnquiries;
     }
 
+    // Mark As Read
     public Enquiry markEnquiryAsRead(Long enquiryId) {
 
         Enquiry enquiry = enquiryRepository.findById(enquiryId)
@@ -58,19 +63,11 @@ public class EnquiryService {
         return enquiryRepository.save(enquiry);
     }
 
-
-
-
-    public void hideEnquiries(Long adminId) {
-        User admin = userRepository.findById(adminId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        if (admin.getRole() != User.Role.ADMIN) {
-            throw new RuntimeException("Only admin can hide enquiries");
-        }
-        List<Enquiry> enquiries = enquiryRepository.findAll();
-        for (Enquiry enquiry : enquiries) {
-            enquiry.setHidden(true);
-        }
-        enquiryRepository.saveAll(enquiries);
+    // View & Hide Enquiry
+    public void toggleEnquiryVisibility(Long id, boolean hidden) {
+        Enquiry enquiry = enquiryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Enquiry not found"));
+        enquiry.setHidden(hidden);
+        enquiryRepository.save(enquiry);
     }
 }
