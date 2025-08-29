@@ -42,8 +42,7 @@ public class CartService {
                 });
 
         //Getting product by productId
-        Product product = productService.getProductById(cartItemRequest.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + cartItemRequest.getProductId()));
+        Product product = productService.getProductById(cartItemRequest.getProductId());
 
         //Finding the cart item by cartId and productId, or creating a new one if it doesn't exist
         CartItem cartItem = cartItemRepository.findByCartIdAndProductId(cart.getId(), product.getId())

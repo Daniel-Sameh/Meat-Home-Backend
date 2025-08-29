@@ -26,8 +26,8 @@ public class Product {
     @Column(name = "image_url", nullable = true)
     private String imageUrl;
 
-    ///TODO: add join column on category
-
-    private String category;
+    @ManyToOne
+    @JoinColumn(name = "category", nullable = true)
+    private Category category;
 
 }
