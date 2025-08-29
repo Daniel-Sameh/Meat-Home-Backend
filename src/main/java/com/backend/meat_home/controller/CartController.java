@@ -24,47 +24,22 @@ public class CartController {
 
     // Add Item
     @PostMapping("/add-item")
-    public ResponseEntity<?> addItemToCart(@RequestBody CartItemRequest cartItemRequest) {
+    public ResponseEntity<Cart> addItemToCart(@RequestBody CartItemRequest cartItemRequest) {
         logger.info("Adding item to cart: {}", cartItemRequest);
-        try{
-            Cart cart = cartService.addItem(cartItemRequest);
-            return ResponseEntity.ok(cart);
-        }catch (Exception e){
-            if (e.getMessage().contains("not found")) {
-                return ResponseEntity.status(404).body(e.getMessage());
-            } else {
-                return ResponseEntity.status(500).body("An error occurred while adding item to cart: " + e.getMessage());
-            }
-        }
+        return ResponseEntity.ok(cartService.addItem(cartItemRequest));
     }
 
     // Update Cart
     @PutMapping("/update/{cartItemId}")
-    public ResponseEntity<?> updateCartItem(@PathVariable Long cartItemId, @RequestBody CartItemRequest cartItemRequest) {
-        try {
-            Optional<CartItem> cartItem = cartService.updateCartItemQuantity(cartItemId, cartItemRequest.getQuantity());
-            return ResponseEntity.ok(cartItem);
-        } catch (Exception e) {
-            if (e.getMessage().contains("not found")) {
-                return ResponseEntity.status(404).body(e.getMessage());
-            } else {
-                return ResponseEntity.status(500).body("An error occurred while updating the cart item: " + e.getMessage());
-            }
-        }
+    public ResponseEntity<CartItem> updateCartItem(@PathVariable Long cartItemId, @RequestBody CartItemRequest cartItemRequest) {
+        logger.info("Updating cart item with ID {}: {}", cartItemId, cartItemRequest);
+        return ResponseEntity.ok(cartService.updateCartItemQuantity(cartItemId, cartItemRequest.getQuantity()));
     }
 
     // Get Cart
     @GetMapping("/view/{customerId}")
-    public ResponseEntity<?> viewCart(@PathVariable Long customerId) {
-        try {
-            List<CartItem> cart = cartService.viewCart(customerId);
-            return ResponseEntity.ok(cart);
-        } catch (Exception e) {
-            if (e.getMessage().contains("not found")) {
-                return ResponseEntity.status(404).body(e.getMessage());
-            } else {
-                return ResponseEntity.status(500).body("An error occurred while viewing the cart: " + e.getMessage());
-            }
-        }
+    public ResponseEntity<List<CartItem>> viewCart(@PathVariable Long customerId) {
+        logger.info("Viewing cart for customer ID: {}", customerId);
+        return ResponseEntity.ok(cartService.viewCart(customerId));
     }
 }
