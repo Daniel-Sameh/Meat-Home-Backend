@@ -5,6 +5,7 @@ import com.backend.meat_home.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,7 +50,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/enquiries/visibility/{enquiryId}").hasRole("ADMIN")
                         .requestMatchers("/api/settings/platform", "/api/settings/terms", "/api/settings/about").permitAll()
                         .requestMatchers("/api/settings/update", "/api/settings/preview").hasRole("ADMIN")
-
+                        .requestMatchers("/api/products/create").hasRole("ADMIN")
+                        .requestMatchers("/api/products/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/{productId}").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/products/{productId}").hasRole("ADMIN")
                         /**
                          * Simply add any endpoint you need to be protected along with the role
                          * .requestMatchers("/api/protected/**").hasRole("role")
