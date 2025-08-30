@@ -5,6 +5,8 @@ import com.backend.meat_home.repository.SettingsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.NoSuchElementException;
+
 @Service
 public class SettingsService {
 
@@ -25,13 +27,13 @@ public class SettingsService {
     // Get About Section
     public Settings getAboutSection() {
         return settingsRepository.findById(settingsRecordId)
-                .orElseThrow(() -> new RuntimeException("Settings not found"));
+                .orElseThrow(() -> new NoSuchElementException("Settings not found"));
     }
 
     // Get Terms and Conditions
     public Settings getTermsAndConditions() {
         return settingsRepository.findById(settingsRecordId)
-                .orElseThrow(() -> new RuntimeException("Settings not found"));
+                .orElseThrow(() -> new NoSuchElementException("Settings not found"));
     }
 
     // Update Settings
