@@ -117,6 +117,14 @@ public class ProductService {
     }
 
 
+    public void deleteProduct(Long id){
+        if (!productRepository.existsById(id)) {
+            throw new NoSuchElementException("Product not found with id: " + id);
+        }
+        productRepository.deleteById(id);
+    }
+
+
 
 
 

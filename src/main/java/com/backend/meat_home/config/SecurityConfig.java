@@ -57,6 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/products/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products/{productId}").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/products/{productId}").hasRole("ADMIN")
+                        .requestMatchers("/api/products/delete/{productId}").hasRole("ADMIN")
                         /**
                          * Simply add any endpoint you need to be protected along with the role
                          * .requestMatchers("/api/protected/**").hasRole("role")
