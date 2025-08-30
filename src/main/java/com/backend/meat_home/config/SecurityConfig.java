@@ -5,6 +5,7 @@ import com.backend.meat_home.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,6 +53,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/create", "/api/users", "/api/users/{id}", "/api/users/delete/{id}", "/api/users/role", "/api/users/activate/{id}", "/api/users/deactivate/{id}").hasRole("ADMIN")
                         .requestMatchers("/api/users/update").hasAnyRole("ADMIN", "CALL_CENTER_AGENT", "CUSTOMER", "DRIVER")
                         .requestMatchers("/api/orders/reassign-driver/{orderId}/{driverId}").hasRole("ADMIN")
+                        .requestMatchers("/api/products/create").hasRole("ADMIN")
+                        .requestMatchers("/api/products/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/{productId}").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/products/{productId}").hasRole("ADMIN")
                         /**
                          * Simply add any endpoint you need to be protected along with the role
                          * .requestMatchers("/api/protected/**").hasRole("role")

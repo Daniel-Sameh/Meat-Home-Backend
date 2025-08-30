@@ -5,6 +5,7 @@ import com.backend.meat_home.entity.Cart;
 import com.backend.meat_home.entity.CartItem;
 import com.backend.meat_home.entity.Product;
 import com.backend.meat_home.entity.User;
+import com.backend.meat_home.exception.ResourceNotFoundException;
 import com.backend.meat_home.repository.CartItemRepository;
 import com.backend.meat_home.repository.CartRepository;
 import com.backend.meat_home.repository.UserRepository;
@@ -19,7 +20,6 @@ import java.util.Optional;
 @AllArgsConstructor
 public class CartService {
 
-    private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
@@ -27,23 +27,19 @@ public class CartService {
     // Add Item to Cart
     public Cart addItem(CartItemRequest cartItemRequest) {
 
-        //Getting user by customerId
-        Long customerId = cartItemRequest.getCustomerId();
-        User user = userRepository.findById(customerId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + customerId));
-
         //Getting the user cart or making or not if not exists.
-        Cart cart = cartRepository.findByCustomerId(user)
+        Cart cart = cartRepository.findByCustomerId_Id(cartItemRequest.getCustomerId())
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
+                    User user = new User();
+                    user.setId(cartItemRequest.getCustomerId());
                     newCart.setCustomerId(user);
-                    cartRepository.save(newCart);
-                    return newCart;
+                    return cartRepository.save(newCart);
                 });
 
         //Getting product by productId
-        Product product = productService.getProductById(cartItemRequest.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + cartItemRequest.getProductId()));
+        Product product = productService.getProductById(cartItemRequest.getProductId());
+
 
         //Finding the cart item by cartId and productId, or creating a new one if it doesn't exist
         CartItem cartItem = cartItemRepository.findByCartIdAndProductId(cart.getId(), product.getId())
@@ -61,28 +57,27 @@ public class CartService {
     }
 
     // Update Quantity
-    public Optional<CartItem> updateCartItemQuantity(Long itemId, float quantity){
+    public CartItem updateCartItemQuantity(Long itemId, float quantity){
         //Getting the cart item by the item id
         CartItem cartItem = cartItemRepository.findById(itemId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart item not found with id: " + itemId));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found with id: " + itemId));
 
         if (quantity<=0){
             //If the quantity is less than or equal to zero, delete the cart item
             cartItemRepository.deleteById(itemId);
-            return Optional.empty(); // Return null to indicate that the item was deleted
+            return null;
         }
 
         //Updating the quantity of the cart item
         cartItem.setQuantity(quantity);
-        cartItemRepository.save(cartItem);
-        return Optional.of(cartItem);
+        return cartItemRepository.save(cartItem);
     }
 
     // View Cart
     public List<CartItem> viewCart(Long customerId) {
         //Finding the cart by customerId
         Cart cart = cartRepository.findByCustomerId_Id(customerId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found for user with id: " + customerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user with id: " + customerId));
 
         //Returning the list of cart items
         return cartItemRepository.findAllByCartId(cart.getId());
@@ -92,7 +87,7 @@ public class CartService {
     public Boolean resetCart(Long customerId){
         //Finding the cart by customerId
         Cart cart = cartRepository.findByCustomerId_Id(customerId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found for user with id: " + customerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user with id: " + customerId));
 
         //Deleting all items in the cart
         cartItemRepository.deleteAllByCartId(cart.getId());
