@@ -49,7 +49,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/enquiries/visibility/{enquiryId}").hasRole("ADMIN")
                         .requestMatchers("/api/settings/platform", "/api/settings/terms", "/api/settings/about").permitAll()
                         .requestMatchers("/api/settings/update", "/api/settings/preview").hasRole("ADMIN")
-
+                        .requestMatchers("/api/users/create", "/api/users", "/api/users/{id}", "/api/users/delete/{id}", "/api/users/role", "/api/users/activate/{id}", "/api/users/deactivate/{id}").hasRole("ADMIN")
+                        .requestMatchers("/api/users/update").hasAnyRole("ADMIN", "CALL_CENTER_AGENT", "CUSTOMER", "DRIVER")
+                        .requestMatchers("/api/orders/reassign-driver/{orderId}/{driverId}").hasRole("ADMIN")
                         /**
                          * Simply add any endpoint you need to be protected along with the role
                          * .requestMatchers("/api/protected/**").hasRole("role")

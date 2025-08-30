@@ -33,8 +33,20 @@ public class Order {
     private Double totalPrice;
 
     private String address;
-  
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private Order.Status status;
+    public enum Status {
+        PENDING,
+        CONFIRMED,
+        IN_PREPARATION,
+        READY,
+        ASSIGNED,
+        ON_WAY,
+        DELIVERED,
+        CANCELLED
+    }
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;

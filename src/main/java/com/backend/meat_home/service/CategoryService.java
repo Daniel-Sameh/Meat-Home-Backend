@@ -23,7 +23,7 @@ public class CategoryService {
     // Update Category
     public Category updateCategory(Long id, Map<String, Object> updates) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new NoSuchElementException("Category not found"));
 
         if (updates.containsKey("name")) {
             category.setName((String) updates.get("name"));
@@ -35,6 +35,8 @@ public class CategoryService {
 
     // Delete Category
     public void deleteCategory(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Category not found"));
         categoryRepository.deleteById(id);
     }
 
@@ -48,7 +50,7 @@ public class CategoryService {
     // Get Category by ID
     public Category getCategoryById(Long id) {
     Category category = categoryRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Category not found"));
+            .orElseThrow(() -> new NoSuchElementException("Category not found"));
             
     return new Category(category.getId(), category.getName());
     }

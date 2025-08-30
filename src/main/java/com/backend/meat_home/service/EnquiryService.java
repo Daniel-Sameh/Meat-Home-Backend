@@ -57,7 +57,7 @@ public class EnquiryService {
     public Enquiry markEnquiryAsRead(Long enquiryId) {
 
         Enquiry enquiry = enquiryRepository.findById(enquiryId)
-                .orElseThrow(() -> new RuntimeException("Enquiry not found"));
+                .orElseThrow(() -> new NoSuchElementException("Enquiry not found"));
 
         enquiry.setUnread(false);
         return enquiryRepository.save(enquiry);
@@ -66,7 +66,7 @@ public class EnquiryService {
     // View & Hide Enquiry
     public void toggleEnquiryVisibility(Long id, boolean hidden) {
         Enquiry enquiry = enquiryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Enquiry not found"));
+                .orElseThrow(() -> new NoSuchElementException("Enquiry not found"));
         enquiry.setHidden(hidden);
         enquiryRepository.save(enquiry);
     }

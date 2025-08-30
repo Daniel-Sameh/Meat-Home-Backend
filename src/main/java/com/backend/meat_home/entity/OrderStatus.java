@@ -17,7 +17,18 @@ public class OrderStatus {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    private String status;
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private Order.Status status;
+    public enum Status {
+        PENDING,
+        CONFIRMED,
+        IN_PREPARATION,
+        READY,
+        ASSIGNED,
+        ON_WAY,
+        DELIVERED,
+        CANCELLED
+    }
     private LocalDateTime time;
 }

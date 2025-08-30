@@ -36,7 +36,7 @@ public class OrderController {
 
     // Track Order
     @GetMapping("/track/{orderId}")
-    public String trackOrder(@PathVariable Long orderId) {
+    public Order.Status trackOrder(@PathVariable Long orderId) {
         return orderService.trackOrder(orderId);
     }
 
@@ -85,12 +85,19 @@ public class OrderController {
     @PutMapping("/status/{orderId}")
     public ResponseEntity<Order> changeStatus(
             @PathVariable Long orderId,
-            @RequestParam String newStatus) {
+            @RequestParam Order.Status newStatus) {
 
         String role = SecurityContextHolder.getContext().getAuthentication()
                 .getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
 
         Order updatedOrder = orderService.changeOrderStatus(orderId, newStatus, role);
+        return ResponseEntity.ok(updatedOrder);
+    }
+
+    @PutMapping("/reassign-driver/{orderId}/{driverId}")
+    public ResponseEntity<Order> reassignDriver(@PathVariable Long orderId,
+                                                @PathVariable Long driverId) {
+        Order updatedOrder = orderService.reassignDriver(orderId, driverId);
         return ResponseEntity.ok(updatedOrder);
     }
 }
