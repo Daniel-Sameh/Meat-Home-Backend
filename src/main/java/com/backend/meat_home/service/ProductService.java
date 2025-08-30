@@ -38,24 +38,26 @@ public class ProductService {
                 .orElseThrow(() -> new NoSuchElementException("Product not found with id: " + id));
     }
 
-    public Product createProduct(ProductRequest productRequest){
-        // Create and save product first
-        Product product = modelMapper.typeMap(ProductRequest.class, Product.class)
-                .addMappings(mapper -> {
-//                    mapper.map(src -> BigDecimal.valueOf(src.getPrice()), Product::setPrice);
-                    mapper.skip(Product::setCategory);
-                }).map(productRequest);
+    public Product createProduct(ProductRequest productRequest) {
+        // Create new product
+        Product product = new Product();
+        product.setName(productRequest.getName());
+        product.setDescription(productRequest.getDescription());
+        product.setPrice(productRequest.getPrice());
+        product.setImageUrl(productRequest.getImageUrl());
 
+        // Set category if provided
         if (productRequest.getCategoryId() != null) {
             product.setCategory(categoryService.getCategoryById(productRequest.getCategoryId()));
         }
 
+        // Save product first
         Product savedProduct = productRepository.save(product);
 
-        // Then create and save product stock
+        // Create and save product stock
         ProductStock productStock = new ProductStock();
         productStock.setStock(productRequest.getStock());
-        productStock.setId(savedProduct.getId());
+        productStock.setProduct(savedProduct);
         productStockRepository.save(productStock);
 
         return savedProduct;
@@ -117,10 +119,16 @@ public class ProductService {
     }
 
 
+    @Transactional
     public void deleteProduct(Long id){
         if (!productRepository.existsById(id)) {
             throw new NoSuchElementException("Product not found with id: " + id);
         }
+
+        // Delete associated product stock first
+        productStockRepository.deleteByProductId(id);
+
+        // Then delete the product
         productRepository.deleteById(id);
     }
 
